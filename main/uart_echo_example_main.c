@@ -23,15 +23,11 @@
 static const char *TAG = "UART TEST";
 
 #define BUF_SIZE (1024)
-
-//Hàm xử lý ngắt cho nút nhấn
+bool button_press = false;
 static void IRAM_ATTR gpio_isr_handler(void* arg) {
-    // Gửi một chuỗi khi nút được nhấn
-    const char *message = "Button pressed!\n";
-    uart_write_bytes(ECHO_UART_PORT_NUM, message, strlen(message));
+    button_press =! button_press;
 }
 
-// Hàm chính để xử lý UART
 static void echo_task(void *arg) {
     uart_config_t uart_config = {
         .baud_rate = ECHO_UART_BAUD_RATE,
@@ -66,11 +62,14 @@ static void echo_task(void *arg) {
     uint8_t *data = (uint8_t *) malloc(BUF_SIZE);
     while (1) {
         // Đọc dữ liệu từ UART
+
         int len = uart_read_bytes(ECHO_UART_PORT_NUM, data, (BUF_SIZE - 1), 20 / portTICK_RATE_MS);
+        if(button_press)
+        {
         if (len > 0) {
             data[len] = '\0';  // Kết thúc chuỗi
             if (strncmp((const char *)data, "huan", 4) == 0) {
-                const char *message = "IOT";
+                const char *message = "IOT\n";
                 uart_write_bytes(ECHO_UART_PORT_NUM, message, strlen(message));  // Gửi thông điệp "IOT"
                 ESP_LOGI(TAG, "Recv str: %s", message);
             } else {
@@ -80,36 +79,10 @@ static void echo_task(void *arg) {
             }
         }
     }
-}
-// DMA UART
-
-//khoi tao uart dma
-// Khởi tạo UART với DMA
-// static void IRAM_ATTR gpio_isr_handler(void* arg) {
-//     // Gửi một chuỗi khi nút được nhấn
-//     const char *message = "Button pressed!\n";
-//     uart_write_bytes(ECHO_UART_PORT_NUM, message, strlen(message));
-// }
-
-// static void echo_task(void *arg) {
-//     uart_config_t uart_config = {
-//         .baud_rate = ECHO_UART_BAUD_RATE,
-//         .data_bits = UART_DATA_8_BITS,
-//         .parity    = UART_PARITY_DISABLE,
-//         .stop_bits = UART_STOP_BITS_1,
-//         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-//         .source_clk = UART_SCLK_APB,
-//     };
-// }
-
-
-// void recev_send_data(const uint8_t* data, size lenght)
-// {
-
-// }
+    }
+} 
 
 void app_main() {
-    //init_uart_with_dma();
-    // Tạo một task để nhận dữ liệu
+    
     xTaskCreate(echo_task, "echo_task", 2048, NULL, 10, NULL);
 }

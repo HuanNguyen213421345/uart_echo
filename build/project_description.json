@@ -1,7 +1,7 @@
 {
     "version":            "1",
     "project_name":       "uart_echo",
-    "project_version":    "1",
+    "project_version":    "25ee1d8-dirty",
     "project_path":       "D:/esp/uart_echo",
     "idf_path":           "D:/esp/Espressif/frameworks/esp-idf-v4.4.7",
     "build_dir":          "D:/esp/uart_echo/build",
